@@ -2,8 +2,6 @@
 
 ## Overview
 
-## Overview
-
 This project demonstrates using a timer update event to trigger DMA transfers for LED control and timer input capture to measure the signal's period. Users can connect an LED signal with a frequency ranging from 10 Hz to 300 Hz to PA6 to measure and display its frequency.
 
 ## Hardware
