@@ -74,11 +74,11 @@ static void MX_TIM1_Init(void);
   */
 volatile uint16_t capture[2] = {0,0};
 volatile uint8_t state = 0;
+volatile uint16_t elapsed = 0;
 int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -111,6 +111,7 @@ int main(void)
   HAL_DMA_Start(&hdma_tim1_up, (uint32_t)data, (uint32_t)&GPIOA->BSRR, 2);
   __HAL_TIM_ENABLE_DMA(&htim1, TIM_DMA_UPDATE);
 
+  HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
 
   /* USER CODE END 2 */
@@ -143,16 +144,13 @@ int main(void)
 	  			  //Read capture 1 value
 	  			  HAL_UART_Transmit(&huart2,(uint8_t*)cap2, strlen(cap2), HAL_MAX_DELAY );
 
-	  			  uint16_t diff = 0;
+	  			  uint32_t diff = 0;
 
-	  			  if(capture[1] >= capture[0])
-	  				  diff = capture[1] - capture[0];
-	  			  else
-	  				  diff = htim3.Instance->ARR - capture[0] + capture[1];
+	  			 diff = capture[1] - capture[0];
 	  			  //Read the period switch light
 	  			  double freq = 0.0;
 	  			  char result[30];
-	  			  freq = (HAL_RCC_GetHCLKFreq()/(htim3.Instance->PSC + 1)) / (double)diff ;
+	  			  freq = (double)(HAL_RCC_GetHCLKFreq()/(htim3.Instance->PSC + 1)) / diff ;
 	  			  snprintf(result, sizeof(result), "The frequency: %.2lfHz\r\n", freq);
 	  			  HAL_UART_Transmit(&huart2, (uint8_t*)result, strlen(result), HAL_MAX_DELAY);
 
@@ -233,9 +231,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 41999;
+  htim1.Init.Prescaler = 4199;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 999;
+  htim1.Init.Period = 99;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -280,9 +278,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 41999;
+  htim3.Init.Prescaler = 4199;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 3999;
+  htim3.Init.Period = 999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)

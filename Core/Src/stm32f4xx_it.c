@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_it.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -202,10 +203,11 @@ void SysTick_Handler(void)
 /**
   * @brief This function handles TIM3 global interrupt.
   */
+extern volatile uint8_t state;
+extern volatile uint16_t elapsed;
 void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
-
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
@@ -229,9 +231,10 @@ void DMA2_Stream5_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 extern volatile uint16_t capture[2];
-extern volatile uint8_t state;
+
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
+
 	if(htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
 	{
 		if(state == 0)
@@ -241,12 +244,20 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		}
 		else
 		{
-			capture[1] = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_1);
+			capture[1] = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_1) + elapsed*(htim->Instance->ARR+1);
 			state = 2; // Capture completed
 		}
 	}
 }
+//CACULATE THE NUMBER OF THE TIME OVERFLOW
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if(htim->Instance == TIM3 && state == 1)
+	{
+		elapsed += 1;
+	}
+}
 
 
 /* USER CODE END 1 */
